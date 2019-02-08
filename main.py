@@ -33,6 +33,7 @@ from modules.vector_generator import *
 from modules.vector_accuracy_checker import *
 from modules.vector_distance import *
 from modules.file_reader_french import *
+from modules.file_reader_synonym import *
 
 import time
 from time import gmtime, strftime
@@ -143,7 +144,8 @@ norm = 2
 just_test = True
 
 #070219, WOLF
-main_path = os.getcwd() + "/data/output_070219/"
+#070219, WOLF with updated benchmark
+main_path = os.getcwd() + "/data/output_080219/"
 all_pos = ["wolf"]
 just_test = False
 #-----------------------------------------------------------------------------------------------------------------------
@@ -188,7 +190,7 @@ if not just_test:
     log.write("Started at " + str(strftime("%Y-%m-%d %H:%M:%S", gmtime())) + "\n")
 
     if not from_file:
-        if data_type == "wordnet":
+        if data_type == "syn_base":
             all_data = {}   
             emb_matrix = []
             word_list = []
@@ -202,7 +204,7 @@ if not just_test:
 
             # to extract all the requiered information from the data files
             # to create the relation matrix
-            p_matrix, word_list = syn_pMatrixBuilder(file_names[all_pos[0]], lang, to_keep, self_loop, log, ref_model)
+            p_matrix, word_list = syn_pMatrixBuilder(file_names[all_pos[0]], lang, to_keep, True, log, ref_model)
             # to create the relation matrix
             array_writer(word_list, "word_list", "bin", main_path)
             array_writer(p_matrix, "p_matrix", "bin", main_path)

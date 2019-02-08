@@ -2,9 +2,9 @@
 # coding=utf-8
 # python3.6.7 Anaconda
 
-from vector_generator import *
-from vector_accuracy_checker import *
-from vector_distance import *
+from .vector_generator import *
+from .vector_accuracy_checker import *
+from .vector_distance import *
 import time
 from time import gmtime, strftime
 

@@ -2,3 +2,7 @@
 *.pyc
 
 *.py~
+
+/data/*
+.ipynb_*
+.vscode/
