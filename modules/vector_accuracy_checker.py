@@ -105,9 +105,11 @@ def vector_accuracy(ref_model, iter, approach, depth, for_WSD, name, main_path, 
                 ref = os.getcwd() + '/data/input/English_testset/' + ref
             elif lang == "Portuguese":
                 ref = os.getcwd() + '/data/input/Portuguese_testset/' + ref
+            elif lang == "French":
+                ref = os.getcwd() + '/data/input/French_testset/' + ref
             else:
                 ref = os.getcwd() + '/data/input/Dutch_testset/' + ref
             if "questions-words" in ref:
                 model.accuracy(ref, restrict_vocab=None)
             else:
-                model.evaluate_word_pairs(ref)
+                model.evaluate_word_pairs(ref, delimiter=';')

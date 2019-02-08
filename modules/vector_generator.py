@@ -122,7 +122,9 @@ def pMatrix_builder(all_data, all_pos, word_set, synset_wrd, equal_weight, appro
     synonym_index = set()  # a set containg tuples of indexes of words that are synonyms
     w_indx = 0
 
-    weights = {"!": 1, "~": 1, "~i": 1, "@": 1, "@i": 1, "%m": .8, "%s": .8, "%p": .8, "#m": .8, "#s": .8, "#p": .8}
+    #weights = {"!": 1, "~": 1, "~i": 1, "@": 1, "@i": 1, "%m": .8, "%s": .8, "%p": .8, "#m": .8, "#s": .8, "#p": .8}
+    weights = {"!": 1, "~": 1, "~i": 1, "@": 1, "@i": 1, "%m": .8, "%s": .8, "%p": .8, "#m": .8, "#s": .8, "#p": .8, "&": .8, "\\": .8, "<": .8}
+
 
     for i in range(len(word_list)):
         parts = word_list[i].split("\t")
@@ -548,7 +550,7 @@ def dimensionality_reduction(word_list, to_keep, reduction_method, emb_matrix, v
         if normalization:
             if norm == 0 and from_file:
                 print("    Loading the normalized results from the previous run")
-                #emb_matrix = array_loader("Normalized_random_walk", main_path)
+                emb_matrix = array_loader("Normalized_random_walk", main_path)
             else:
                 start_time = time.time()
                 if norm == 1:
@@ -658,6 +660,7 @@ def sort_rem(matrix, word_list, synonym_index, to_keep, lang):
         i = 0
         popped = False
         stop = ""
+        
         while i < to_del:
             indx_val = indx[i]
             if word_list[indx_val] == stop:
@@ -715,11 +718,14 @@ def sort_rem(matrix, word_list, synonym_index, to_keep, lang):
 def gensim_wrd_extractor(lang):
     words_to_keep = set()
     if lang == "English":
-        file_name = ["RG1965.tsv", "wordsim_sim.txt", "wordsim353.tsv", "MTURK-771.csv", "simlex999.txt"]
+        file_name = ["RG1965.csv", "wordsim_sim.csv", "wordsim353.csv", "MTURK-771.csv", "simlex999.csv"]
         src_path = os.getcwd() + '/data/input/English_testset/'
     elif lang == "Portuguese":
         file_name = ["LX-SimLex-999.txt", "LX-WordSim-353.txt"]
         src_path = os.getcwd() + '/data/input/Portuguese_testset/'
+    elif lang == "French":
+        file_name = ["fr-mc.dataset", "fr-rg.dataset", "fr-simlex.dataset", "fr-ws353.dataset"]
+        src_path = os.getcwd() + '/data/input/French_testset/'
     else:
         file_name = ["RG1965.tsv", "wordsim353.tsv"]
         src_path = os.getcwd() + '/data/input/Dutch_testset/'
@@ -735,7 +741,7 @@ def gensim_wrd_extractor(lang):
         for line in src:
             if "# " in line:
                 continue
-            parts = line.split("\t")
+            parts = line.split(";")
             words_to_keep.add(parts[0])
             words_to_keep.add(parts[1])
     print("    final number of words to keep " + str(len(words_to_keep)))
