@@ -123,15 +123,20 @@ def pMatrix_builder(all_data, all_pos, word_set, synset_wrd, equal_weight, appro
     w_indx = 0
 
     #weights = {"!": 1, "~": 1, "~i": 1, "@": 1, "@i": 1, "%m": .8, "%s": .8, "%p": .8, "#m": .8, "#s": .8, "#p": .8}
-    weights = {"!": 1, "~": 1, "~i": 1, "@": 1, "@i": 1, "%m": .8, "%s": .8, "%p": .8, "#m": .8, "#s": .8, "#p": .8, "&": .8, "\\": .8, "<": .8}
+    weights = {"!": 1, "~": 1, "~i": 1, "@": 1, "@i": 1, "%m": .8, "%s": .8, "%p": .8, "#m": .8, "#s": .8, "#p": .8, "&": .8, "\\": .8, "<": .8, "+": 1}
 
 
     for i in range(len(word_list)):
         parts = word_list[i].split("\t")
 
         if for_WSD:
-            word_indx.update({parts[0]:w_indx})
-            w_indx += 1
+            ny_parts = parts[0].split("_offset")
+            ny_word = ny_parts[0]
+            ny_pos = ny_parts[1].rsplit('-',1)[1]
+            ny_word_pos = ny_word+'_'+ny_pos
+            if ny_word_pos not in word_indx.keys():
+                word_indx.update({ny_word_pos:w_indx})
+                w_indx += 1
         else:
             if word_list[i].split("_offset")[0] not in word_indx.keys():
                 word_indx.update({word_list[i].split("_offset")[0]: w_indx})
@@ -139,7 +144,8 @@ def pMatrix_builder(all_data, all_pos, word_set, synset_wrd, equal_weight, appro
 
     dim = (len(word_indx), len(word_indx))
     print("    Matrix dimension is %d x %d" %(dim[0], dim[1]))
-
+    print("    Sample word in word list is %s" %(list(word_indx.keys())[0]))
+    
     p_matrix = np.zeros(dim, dtype = np.float16)
     #p_matrix = np.zeros(dim)
 
@@ -147,7 +153,10 @@ def pMatrix_builder(all_data, all_pos, word_set, synset_wrd, equal_weight, appro
     for i in pbar(range(len(word_list))):
         parts = word_list[i].split("\t")
         if for_WSD:
-            cur_wrd = parts[0]
+            ny_parts = parts[0].split("_offset")
+            ny_word = ny_parts[0]
+            ny_pos = ny_parts[1].rsplit('-',1)[1]
+            cur_wrd = ny_word+'_'+ny_pos
         else:
             cur_wrd = word_list[i].split("_offset")[0]
         cur_synset = parts[1]
@@ -168,6 +177,12 @@ def pMatrix_builder(all_data, all_pos, word_set, synset_wrd, equal_weight, appro
                 for cur_synset_word in cur_synset_words:
                     if not for_WSD:
                         wrd = cur_synset_word.split("_offset")[0]
+                    else:
+                        ny1_parts = cur_synset_word.split('\t')
+                        ny1_parts2 = ny1_parts[0].split("_offset")
+                        ny1_word = ny1_parts2[0]
+                        ny1_pos = ny1_parts[1].rsplit('-',1)[1]
+                        wrd = ny1_word + '_' + ny1_pos
                     if wrd != cur_wrd:
                         syn_wrd_indx = word_indx[wrd]
                         synonym_index.add((cur_wrd_indx, syn_wrd_indx))
@@ -182,6 +197,12 @@ def pMatrix_builder(all_data, all_pos, word_set, synset_wrd, equal_weight, appro
                             for target_wrd in target_wrds:
                                 if not for_WSD:
                                     target_wrd = target_wrd.split("_offset")[0]
+                                else:
+                                    ny1_parts = target_wrd.split('\t')
+                                    ny1_parts2 = ny1_parts[0].split("_offset")
+                                    ny1_word = ny1_parts2[0]
+                                    ny1_pos = ny1_parts[1].rsplit('-',1)[1]
+                                    target_wrd = ny1_word + '_' + ny1_pos
                                 if target_wrd != cur_wrd:
                                     target_wrd_indx = word_indx[target_wrd]
                                     if equal_weight:
@@ -249,18 +270,15 @@ def pMatrix_builder(all_data, all_pos, word_set, synset_wrd, equal_weight, appro
     print("        %d elements out of %d elements are non-zero" % (non_zero, len(p_matrix) * len(p_matrix)))
     log.write("        %d elements out of %d elements are non-zero\n" % (non_zero, len(p_matrix) * len(p_matrix)))
 
-    if for_WSD:
-        return p_matrix, dim, word_list, non_zero          # Code is not Complete YET -> word_list must be edited
-    else:
-        word_list = []
-        temp = sorted(word_indx.items(), key=lambda x: x[1])
-        for itm in temp:
-            word_list.append(itm[0])
-        if to_keep != "all":
-            p_matrix, word_list, synonym_index = sort_rem(p_matrix, word_list, synonym_index, int(to_keep), lang)
-            dim = (len(word_list), len(word_list))
-        print("************Number of words are %d after the cut"%(len(word_list)))
-        return p_matrix, dim, word_list, non_zero, np.array(list(synonym_index))
+    word_list = []
+    temp = sorted(word_indx.items(), key=lambda x: x[1])
+    for itm in temp:
+        word_list.append(itm[0])
+    if to_keep != "all":
+        p_matrix, word_list, synonym_index = sort_rem(p_matrix, word_list, synonym_index, int(to_keep), lang, for_WSD)
+        dim = (len(word_list), len(word_list))
+    print("************Number of words are %d after the cut"%(len(word_list)))
+    return p_matrix, dim, word_list, non_zero, np.array(list(synonym_index))
 
 def random_walk(p_matrix, dim, iter, log, from_file, stage, PMI_coef, main_path):
     if not from_file:
@@ -642,7 +660,7 @@ def dimensionality_reduction(word_list, to_keep, reduction_method, emb_matrix, v
     array_writer(emb_vec, "embeddings_matrix", "bin", main_path)
     return emb_vec, "pcaFeatures", word_list
 
-def sort_rem(matrix, word_list, synonym_index, to_keep, lang):
+def sort_rem(matrix, word_list, synonym_index, to_keep, lang, for_WSD):
     if to_keep >= len(matrix):
         print("    No row/column was eliminated")
         new_word_list= word_list
@@ -665,7 +683,7 @@ def sort_rem(matrix, word_list, synonym_index, to_keep, lang):
             indx_val = indx[i]
             if word_list[indx_val] == stop:
                 break
-            if word_list[indx_val] in words_to_keep:
+            if word_list[indx_val] in words_to_keep or (for_WSD and word_list[indx_val].rsplit('_', 1)[0] in words_to_keep):
                 indx.append(indx.pop(i))
                 if not popped:
                     popped = True
@@ -724,7 +742,7 @@ def gensim_wrd_extractor(lang):
         file_name = ["LX-SimLex-999.txt", "LX-WordSim-353.txt"]
         src_path = os.getcwd() + '/data/input/Portuguese_testset/'
     elif lang == "French":
-        file_name = ["fr-mc.dataset", "fr-rg.dataset", "fr-simlex.dataset", "fr-ws353.dataset"]
+        file_name = ["fr-mc.dataset", "fr-rg.dataset", "fr-simlex.dataset", "fr-ws353.dataset", "tuned-vocabulary.dataset", "fr-pos-simlex.dataset", "fr-pos-wsrel.dataset"]
         src_path = os.getcwd() + '/data/input/French_testset/'
     else:
         file_name = ["RG1965.tsv", "wordsim353.tsv"]
@@ -735,9 +753,14 @@ def gensim_wrd_extractor(lang):
         fl = open(path)
         src = fl.readlines()
         fl.close()
-
+        
         print("    number of words in " + fn + " is " + str(len(src)))
-
+        if fn == "tuned-vocabulary.dataset":
+            for line in src:
+                parts = line.strip()
+                words_to_keep.add(parts)
+            continue
+            
         for line in src:
             if "# " in line:
                 continue

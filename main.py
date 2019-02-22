@@ -136,7 +136,7 @@ feature_name = 'synbase'
 data_type = 'wordnet'
 embedding_file_name = ("auto","abc")  
 lang = "French" 
-to_keep = "15000"
+to_keep = "20000"
 vec_dim = 850    
 accepted_rel = ["syn", "self_loop", "@", "~",  "&", "\\", "<"]    
 norm = 2 
@@ -144,10 +144,21 @@ norm = 2
 just_test = True
 
 #070219, WOLF
+accepted_rel = ["syn", "self_loop", "@", "~",  "&", "\\", "<", "+"]  
 #070219, WOLF with updated benchmark
-main_path = os.getcwd() + "/data/output_080219/"
+#130219, WOLF with fine tuned vocabulary
+#140219, WOLF with POS test files
+#140219 
+accepted_rel = ["syn", "self_loop", "@", "~",  "&", "\\", "<"]  
+#150219, WOLF with POS test files
+main_path = os.getcwd() + "/data/output_140219_all/"
 all_pos = ["wolf"]
 just_test = False
+for_WSD = True
+to_keep = "all" 
+#180219 Resume from Julia results
+from_file = True
+stage = 'random_walk'
 #-----------------------------------------------------------------------------------------------------------------------
 
 
@@ -155,6 +166,8 @@ if lang == "English":
     ref_model = ["wordsim_rel.csv", "wordsim_sim.csv", "simlex999.csv", "MTURK-771.csv", "RG1965.csv"] # "MEN_dataset"
 elif lang == "Portuguese":
     ref_model = ["LX-SimLex-999.txt", "LX-WordSim-353.txt"]
+elif for_WSD and lang == "French":
+    ref_model = ["fr-pos-simlex.dataset", "fr-pos-wsrel.dataset"]
 elif lang == "French":
     ref_model = ["fr-mc.dataset", "fr-rg.dataset", "fr-simlex.dataset", "fr-ws353.dataset"]
 else:
