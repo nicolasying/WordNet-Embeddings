@@ -10,7 +10,6 @@ Principles of Distributed Semantic Processing in the Human Brain,
 ***
 a research project conducted within the Cogmaster M2 research internship.
 
-
 **Author:** 
 Songsheng Ying, soshyng@gmail.com
 
@@ -19,6 +18,16 @@ Sabine Ploux, Laurent Bonnasse-Gahot, Christophe Pallier.
 ***
 **Original project name:** WordNet Embeddings.
 
+## About Micipsa
+
+Micipsa is the code named for the research internship project mentioned above. 
+It investigates the two aspects of semantic processing's implication in the human brain. 
+
+[Root repository of Micipsa](https://github.com/nicolasying/micipsa.github.io)
+
+[Masters' thesis](https://github.com/nicolasying/Micipsa-Thesis)
+
+## WordNet Embedding
 This project is based on 
 
 **Article**
@@ -142,4 +151,6 @@ To run the software, you will need the following packages:
 * scipy
 * gensim
 
-Python3.5 was used for the experimentation.
+Python3.5 was used for the original experimentation.
+
+The code is also Python 3.6.7 compatible.
